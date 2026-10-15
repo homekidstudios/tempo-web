@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagrama Entidad-Relación (Notación de Chen) - Clínica Veterinaria</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .node-hover:hover { filter: brightness(1.05); transform: scale(1.02); transition: all 0.2s ease; }
+        .draggable { cursor: grab; }
+        .draggable:active { cursor: grabbing; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-slate-800 border-b border-slate-700 px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="flex items-center gap-3">
+            <div class="bg-emerald-500 text-slate-900 p-2.5 rounded-xl font-bold text-xl shadow-lg shadow-emerald-500/20">
+                <i class="fa-solid fa-paw"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold text-white tracking-tight">Clínica Veterinaria - Modelo ER (Chen)</h1>
+                <p class="text-xs text-slate-400">Visualizador interactivo de entidades, relaciones y cardinalidad</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <button onclick="resetPositions()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-sm font-medium rounded-lg transition-colors flex items-center gap-2">
+                <i class="fa-solid fa-rotate-left"></i> Centrar Diagrama
+            </button>
+            <button onclick="openModal('codeModal')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-slate-900 font-semibold text-sm rounded-lg shadow-lg shadow-emerald-600/20 transition-all flex items-center gap-2">
+                <i class="fa-solid fa-code"></i> Ver Código (Mermaid/PlantUML)
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 flex flex-col lg:flex-row relative overflow-hidden">
+        
+        <!-- Canvas / Diagram Area -->
+        <div id="canvas-container" class="flex-1 relative bg-slate-950 overflow-hidden cursor-crosshair min-h-[500px] flex items-center justify-center">
+            <!-- Grid background pattern -->
+            <div class="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-30 pointer-events-none"></div>
+
+            <!-- SVG Diagram -->
+            <svg id="erd-svg" class="w-full h-full absolute inset-0 select-none" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid meet">
+                <!-- SVG Definitions (Markers, gradients, etc.) -->
+                <defs>
+                    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow dx="2" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.4"/>
+                    </filter>
+                </defs>
+
+                <!-- Lines (Connections) -->
+                <g id="links-layer">
+                    <!-- Propietario - Posee - Mascota -->
+                    <path id="link-prop-posee" d="M 220 200 L 370 200" stroke="#64748b" stroke-width="3" stroke-dasharray="none"/>
+                    <path id="link-posee-mascota" d="M 450 200 L 600 200" stroke="#64748b" stroke-width="3" stroke-dasharray="none"/>
+                    
+                    <!-- Mascota - Asiste - Cita -->
+                    <path id="link-mascota-asiste" d="M 680 250 L 680 370" stroke="#64748b" stroke-width="3" stroke-dasharray="none"/>
+                    <path id="link-asiste-cita" d="M 680 430 L 680 550" stroke="#64748b" stroke-width="3" stroke-dasharray="none"/>
+
+                    <!-- Veterinario - Atiende - Cita -->
+                    <path id="link-vet-atiende" d="M 320 580 L 470 580" stroke="#64748b" stroke-width="3" stroke-dasharray="none"/>
+                    <path id="link-atiende-cita" d="M 550 580 L 600 580" stroke="#64748b" stroke-width="3" stroke-dasharray="none"/>
+
+                    <!-- Cita - Incluye - Tratamiento -->
+                    <path id="link-cita-incluye" d="M 760 580 L 910 580" stroke="#64748b" stroke-width="3" stroke-dasharray="none"/>
+                    <path id="link-incluye-tratamiento" d="M 990 580 L 1100 580" stroke="#64748b" stroke-width="3" stroke-dasharray="none"/>
+
+                    <!-- Attributes links -->
+                    <path d="M 160 140 L 160 170" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3"/>
+                    <path d="M 220 140 L 190 170" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3"/>
+                    <path d="M 100 140 L 130 170" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3"/>
+
+                    <path d="M 680 120 L 680 170" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3"/>
+                    <path d="M 740 120 L 710 170" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3"/>
+
+                    <path d="M 260 520 L 290 550" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3"/>
+                    <path d="M 320 520 L 320 550" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3"/>
+
+                    <path d="M 680 630 L 680 670" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3"/>
+                    <path d="M 620 630 L 650 670" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3"/>
+
+                    <path d="M 1050 510 L 1050 550" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3"/>
+                    <path d="M 1110 510 L 1080 550" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3"/>
+                    <path d="M 990 510 L 1020 550" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3"/>
+                </g>
+
+                <!-- Cardinality & Participation Indicators -->
+                <g id="cardinality-labels" class="text-xs font-bold fill-emerald-400">
+                    <text x="345" y="190" text-anchor="middle">1</text>
+                    <text x="475" y="190" text-anchor="middle">N</text>
+                    <text x="695" y="290" text-anchor="middle">1</text>
+                    <text x="695" y="500" text-anchor="middle">N</text>
+                    <text x="445" y="570" text-anchor="middle">1</text>
+                    <text x="575" y="570" text-anchor="middle">N</text>
+                    <text x="785" y="570" text-anchor="middle">N</text>
+                    <text x="885" y="570" text-anchor="middle">M</text>
+                </g>
+
+                <!-- Nodes Layer (Entities, Relations, Attributes) -->
+                <g id="nodes-layer">
+                    
+                    <!-- ENTITY: PROPIETARIO -->
+                    <g class="draggable node-hover" transform="translate(160, 200)" onclick="selectElement('propietario')">
+                        <rect x="-80" y="-40" width="160" height="80" rx="6" fill="#1e293b" stroke="#38bdf8" stroke-width="3" filter="url(#shadow)" />
+                        <text x="0" y="5" fill="#f8fafc" font-size="16" font-weight="bold" text-anchor="middle">PROPIETARIO</text>
+                    </g>
+
+                    <!-- RELATION: POSEE -->
+                    <g class="draggable node-hover" transform="translate(410, 200)" onclick="selectElement('posee')">
+                        <polygon points="0,-45 70,0 0,45 -70,0" fill="#1e293b" stroke="#f43f5e" stroke-width="2.5" filter="url(#shadow)" />
+                        <text x="0" y="5" fill="#f8fafc" font-size="14" font-weight="600" text-anchor="middle">Posee</text>
+                    </g>
+
+                    <!-- ENTITY: MASCOTA -->
+                    <g class="draggable node-hover" transform="translate(680, 200)" onclick="selectElement('mascota')">
+                        <!-- Double border for total participation representation -->
+                        <rect x="-80" y="-45" width="160" height="90" rx="6" fill="#1e293b" stroke="#38bdf8" stroke-width="3" filter="url(#shadow)" />
+                        <rect x="-74" y="-39" width="148" height="78" rx="4" fill="none" stroke="#38bdf8" stroke-width="1.5" />
+                        <text x="0" y="5" fill="#f8fafc" font-size="16" font-weight="bold" text-anchor="middle">MASCOTA</text>
+                    </g>
+
+                    <!-- RELATION: ASISTE -->
+                    <g class="draggable node-hover" transform="translate(680, 400)" onclick="selectElement('asiste')">
+                        <polygon points="0,-35 60,0 0,35 -60,0" fill="#1e293b" stroke="#f43f5e" stroke-width="2.5" filter="url(#shadow)" />
+                        <text x="0" y="5" fill="#f8fafc" font-size="14" font-weight="600" text-anchor="middle">Asiste</text>
+                    </g>
+
+                    <!-- ENTITY: CITA -->
+                    <g class="draggable node-hover" transform="translate(680, 580)" onclick="selectElement('cita')">
+                        <rect x="-80" y="-45" width="160" height="90" rx="6" fill="#1e293b" stroke="#38bdf8" stroke-width="3" filter="url(#shadow)" />
+                        <rect x="-74" y="-39" width="148" height="78" rx="4" fill="none" stroke="#38bdf8" stroke-width="1.5" />
+                        <text x="0" y="5" fill="#f8fafc" font-size="16" font-weight="bold" text-anchor="middle">CITA</text>
+                    </g>
+
+                    <!-- RELATION: ATIENDE -->
+                    <g class="draggable node-hover" transform="translate(510, 580)" onclick="selectElement('atiende')">
+                        <polygon points="0,-35 60,0 0,35 -60,0" fill="#1e293b" stroke="#f43f5e" stroke-width="2.5" filter="url(#shadow)" />
+                        <text x="0" y="5" fill="#f8fafc" font-size="14" font-weight="600" text-anchor="middle">Atiende</text>
+                    </g>
+
+                    <!-- ENTITY: VETERINARIO -->
+                    <g class="draggable node-hover" transform="translate(240, 580)" onclick="selectElement('veterinario')">
+                        <rect x="-80" y="-40" width="160" height="80" rx="6" fill="#1e293b" stroke="#38bdf8" stroke-width="3" filter="url(#shadow)" />
+                        <text x="0" y="5" fill="#f8fafc" font-size="16" font-weight="bold" text-anchor="middle">VETERINARIO</text>
+                    </g>
+
+                    <!-- RELATION: INCLUYE -->
+                    <g class="draggable node-hover" transform="translate(950, 580)" onclick="selectElement('incluye')">
+                        <polygon points="0,-35 60,0 0,35 -60,0" fill="#1e293b" stroke="#f43f5e" stroke-width="2.5" filter="url(#shadow)" />
+                        <text x="0" y="5" fill="#f8fafc" font-size="14" font-weight="600" text-anchor="middle">Incluye</text>
+                    </g>
+
+                    <!-- ENTITY: TRATAMIENTO -->
+                    <g class="draggable node-hover" transform="translate(1100, 580)" onclick="selectElement('tratamiento')">
+                        <rect x="-80" y="-40" width="160" height="80" rx="6" fill="#1e293b" stroke="#38bdf8" stroke-width="3" filter="url(#shadow)" />
+                        <text x="0" y="5" fill="#f8fafc" font-size="15" font-weight="bold" text-anchor="middle">TRATAMIENTO</text>
+                    </g>
+
+                    <!-- ATTRIBUTES: PROPIETARIO -->
+                    <g class="node-hover" onclick="selectAttribute('id_prop')">
+                        <ellipse cx="100" cy="120" rx="45" ry="20" fill="#0f172a" stroke="#a78bfa" stroke-width="1.5" />
+                        <text x="100" y="124" fill="#cbd5e1" font-size="11" text-anchor="middle" font-style="italic"><tspan text-decoration="underline">id_propietario</tspan></text>
+                    </g>
+                    <g class="node-hover" onclick="selectAttribute('nombre_prop')">
+                        <ellipse cx="160" cy="120" rx="35" ry="20" fill="#0f172a" stroke="#a78bfa" stroke-width="1.5" />
+                        <text x="160" y="124" fill="#cbd5e1" font-size="11" text-anchor="middle">nombre</text>
+                    </g>
+                    <g class="node-hover" onclick="selectAttribute('tel_prop')">
+                        <ellipse cx="220" cy="120" rx="35" ry="20" fill="#0f172a" stroke="#a78bfa" stroke-width="1.5" />
+                        <text x="220" y="124" fill="#cbd5e1" font-size="11" text-anchor="middle">teléfono</text>
+                    </g>
+
+                    <!-- ATTRIBUTES: MASCOTA -->
+                    <g class="node-hover" onclick="selectAttribute('id_masc')">
+                        <ellipse cx="680" cy="100" rx="45" ry="20" fill="#0f172a" stroke="#a78bfa" stroke-width="1.5" />
+                        <text x="680" y="104" fill="#cbd5e1" font-size="11" text-anchor="middle" font-style="italic"><tspan text-decoration="underline">id_mascota</tspan></text>
+                    </g>
+                    <g class="node-hover" onclick="selectAttribute('nombre_masc')">
+                        <ellipse cx="740" cy="100" rx="35" ry="20" fill="#0f172a" stroke="#a78bfa" stroke-width="1.5" />
+                        <text x="740" y="104" fill="#cbd5e1" font-size="11" text-anchor="middle">nombre</text>
+                    </g>
+
+                    <!-- ATTRIBUTES: VETERINARIO -->
+                    <g class="node-hover" onclick="selectAttribute('id_vet')">
+                        <ellipse cx="260" cy="500" rx="45" ry="20" fill="#0f172a" stroke="#a78bfa" stroke-width="1.5" />
+                        <text x="260" y="504" fill="#cbd5e1" font-size="11" text-anchor="middle" font-style="italic"><tspan text-decoration="underline">id_veterinario</tspan></text>
+                    </g>
+                    <g class="node-hover" onclick="selectAttribute('esp_vet')">
+                        <ellipse cx="320" cy="500" rx="45" ry="20" fill="#0f172a" stroke="#a78bfa" stroke-width="1.5" />
+                        <text x="320" y="504" fill="#cbd5e1" font-size="11" text-anchor="middle">especialidad</text>
+                    </g>
+
+                    <!-- ATTRIBUTES: CITA -->
+                    <g class="node-hover" onclick="selectAttribute('id_cita')">
+                        <ellipse cx="620" cy="650" rx="35" ry="20" fill="#0f172a" stroke="#a78bfa" stroke-width="1.5" />
+                        <text x="620" y="654" fill="#cbd5e1" font-size="11" text-anchor="middle" font-style="italic"><tspan text-decoration="underline">id_cita</tspan></text>
+                    </g>
+                    <g class="node-hover" onclick="selectAttribute('fecha_cita')">
+                        <ellipse cx="680" cy="650" rx="35" ry="20" fill="#0f172a" stroke="#a78bfa" stroke-width="1.5" />
+                        <text x="680" y="654" fill="#cbd5e1" font-size="11" text-anchor="middle">fecha_hora</text>
+                    </g>
+
+                    <!-- ATTRIBUTES: TRATAMIENTO -->
+                    <g class="node-hover" onclick="selectAttribute('id_trat')">
+                        <ellipse cx="990" cy="490" rx="45" ry="20" fill="#0f172a" stroke="#a78bfa" stroke-width="1.5" />
+                        <text x="990" y="494" fill="#cbd5e1" font-size="11" text-anchor="middle" font-style="italic"><tspan text-decoration="underline">id_tratamiento</tspan></text>
+                    </g>
+                    <g class="node-hover" onclick="selectAttribute('nombre_trat')">
+                        <ellipse cx="1050" cy="490" rx="35" ry="20" fill="#0f172a" stroke="#a78bfa" stroke-width="1.5" />
+                        <text x="1050" y="494" fill="#cbd5e1" font-size="11" text-anchor="middle">nombre</text>
+                    </g>
+                    <g class="node-hover" onclick="selectAttribute('costo_trat')">
+                        <ellipse cx="1110" cy="490" rx="30" ry="20" fill="#0f172a" stroke="#a78bfa" stroke-width="1.5" />
+                        <text x="1110" y="494" fill="#cbd5e1" font-size="11" text-anchor="middle">costo</text>
+                    </g>
+
+                </g>
+            </svg>
+
+            <!-- Floating Legend -->
+            <div class="absolute bottom-4 left-4 bg-slate-900/90 backdrop-blur border border-slate-700 p-4 rounded-xl shadow-xl text-xs flex flex-col gap-2 max-w-xs pointer-events-none">
+                <span class="font-bold text-slate-200 uppercase tracking-wider mb-1">Guía de Notación (Chen)</span>
+                <div class="flex items-center gap-2"><div class="w-4 h-3 bg-slate-800 border-2 border-sky-400 rounded"><span>Entidad</span></div></div>
+                <div class="flex items-center gap-2"><div class="w-4 h-3 bg-slate-800 border-2 border-slate-600 rounded relative"><div class="absolute inset-0.5 border border-sky-400 rounded"></div></div><span>Participación Total (Doble línea)</span></div>
+                <div class="flex items-center gap-2"><div class="w-4 h-3 bg-slate-800 border-2 border-rose-500 transform rotate-45 scale-75"></div><span class="ml-1">Relación</span></div>
+                <div class="flex items-center gap-2"><div class="w-4 h-3 bg-slate-800 border border-purple-400 rounded-full"></div><span>Atributo (Subrayado = Clave)</span></div>
+                <p class="text-[10px] text-slate-400 mt-1 italic">💡 Haz clic sobre cualquier entidad o relación para ver sus reglas y cardinalidad detallada en el panel lateral.</p>
+            </div>
+        </div>
+
+        <!-- Sidebar Details Panel -->
+        <aside class="w-full lg:w-96 bg-slate-800 border-t lg:border-t-0 lg:border-l border-slate-700 p-6 flex flex-col gap-6 overflow-y-auto">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-circle-info text-emerald-400"></i> Inspector de Elementos
+                </h2>
+                <span class="text-xs bg-slate-700 px-2 py-1 rounded text-slate-300">Modo Interactivo</span>
+            </div>
+
+            <!-- Dynamic Detail Container -->
+            <div id="inspector-content" class="flex flex-col gap-4 text-sm">
+                <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700/60 text-slate-400 text-center py-10">
+                    <i class="fa-regular fa-hand-pointer text-3xl mb-2 text-slate-500"></i>
+                    <p>Selecciona una entidad, relación o atributo en el diagrama o en la lista rápida para consultar su justificación y reglas de negocio.</p>
+                </div>
+            </div>
+
+            <!-- Quick Navigation List -->
+            <div class="mt-auto pt-4 border-t border-slate-700">
+                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Elementos del Modelo</h3>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <button onclick="selectElement('propietario')" class="p-2 bg-slate-700/50 hover:bg-slate-700 rounded-lg text-left transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-square text-sky-400"></i> Propietario
+                    </button>
+                    <button onclick="selectElement('mascota')" class="p-2 bg-slate-700/50 hover:bg-slate-700 rounded-lg text-left transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-square text-sky-400"></i> Mascota
+                    </button>
+                    <button onclick="selectElement('veterinario')" class="p-2 bg-slate-700/50 hover:bg-slate-700 rounded-lg text-left transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-square text-sky-400"></i> Veterinario
+                    </button>
+                    <button onclick="selectElement('cita')" class="p-2 bg-slate-700/50 hover:bg-slate-700 rounded-lg text-left transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-square text-sky-400"></i> Cita
+                    </button>
+                    <button onclick="selectElement('tratamiento')" class="p-2 bg-slate-700/50 hover:bg-slate-700 rounded-lg text-left transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-square text-sky-400"></i> Tratamiento
+                    </button>
+                    <button onclick="selectElement('posee')" class="p-2 bg-slate-700/50 hover:bg-slate-700 rounded-lg text-left transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-diamond text-rose-400"></i> Posee (1:N)
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+    </main>
+
+    <!-- Code Export Modal -->
+    <div id="codeModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="px-6 py-4 border-b border-slate-700 flex justify-between items-center bg-slate-900/50">
+                <h3 class="font-bold text-lg text-white flex items-center gap-2">
+                    <i class="fa-solid fa-code text-emerald-400"></i> Código de Representación (Mermaid & PlantUML)
+                </h3>
+                <button onclick="closeModal('codeModal')" class="text-slate-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto flex flex-col gap-6">
+                <!-- Tab switcher or tabs -->
+                <div>
+                    <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Diagrama Entidad-Relación (Mermaid ER)</h4>
+                    <div class="relative">
+                        <pre class="bg-slate-950 text-emerald-300 p-4 rounded-xl text-xs font-mono overflow-x-auto border border-slate-700/60"><code>erDiagram
+    PROPIETARIO ||--o{ MASCOTA : "Posee"
+    MASCOTA ||--o{ CITA : "Asiste"
+    VETERINARIO ||--o{ CITA : "Atiende"
+    CITA }o--o{ TRATAMIENTO : "Incluye"
+
+    PROPIETARIO {
+        int id_propierario PK
+        string nombre
+        string telefono
+    }
+    MASCOTA {
+        int id_mascota PK
+        string nombre
+        int id_propietario FK
+    }
+    VETERINARIO {
+        int id_veterinario PK
+        string especialidad
+    }
+    CITA {
+        int id_cita PK
+        datetime fecha_hora
+        int id_mascota FK
+        int id_veterinario FK
+    }
+    TRATAMIENTO {
+        int id_tratamiento PK
+        string nombre
+        float costo
+    }</code></pre>
+                        <button onclick="copyCode(this)" class="absolute top-2 right-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded-lg border border-slate-600 transition-colors flex items-center gap-1.5">
+                            <i class="fa-regular fa-copy"></i> Copiar
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">PlantUML Notation</h4>
+                    <div class="relative">
+                        <pre class="bg-slate-950 text-emerald-300 p-4 rounded-xl text-xs font-mono overflow-x-auto border border-slate-700/60"><code>@startuml
+left to right direction
+skinparam linetype ortho
+
+entity "PROPIETARIO" as P {
+  *id_propietario : number
+  --
+  nombre : string
+  telefono : string
+}
+
+entity "MASCOTA" as M {
+  *id_mascota : number
+  --
+  nombre : string
+}
+
+entity "VETERINARIO" as V {
+  *id_veterinario : number
+  --
+  especialidad : string
+}
+
+entity "CITA" as C {
+  *id_cita : number
+  --
+  fecha_hora : datetime
+}
+
+entity "TRATAMIENTO" as T {
+  *id_tratamiento : number
+  --
+  nombre : string
+  costo : float
+}
+
+P ||--o{ M : Posee
+M ||--o{ C : Asiste
+V ||--o{ C : Atiende
+C }o--o{ T : Incluye
+@enduml</code></pre>
+                        <button onclick="copyCode(this)" class="absolute top-2 right-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded-lg border border-slate-600 transition-colors flex items-center gap-1.5">
+                            <i class="fa-regular fa-copy"></i> Copiar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-6 py-4 border-t border-slate-700 bg-slate-900/50 flex justify-end">
+                <button onclick="closeModal('codeModal')" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-medium text-sm rounded-lg transition-colors">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Data dictionary for the inspector panel
+        const modelData = {
+            propietario: {
+                type: "Entidad",
+                name: "PROPIETARIO",
+                participation: "Parcial (en la relación Posee)",
+                cardinalidad: "1 (hacia Mascota)",
+                attributes: ["id_propietario (PK)", "nombre", "teléfono"],
+                description: "Representa a los clientes de la clínica veterinaria.",
+                rule: "Un propietario puede registrarse antes de incorporar a sus mascotas (participación parcial, puede tener 0 mascotas) y puede tener varias mascotas (1:N)."
+            },
+            mascota: {
+                type: "Entidad",
+                name: "MASCOTA",
+                participation: "Total (hacia Propietario) / Parcial (hacia Cita)",
+                cardinalidad: "N (con Propietario) | 1 (con Cita)",
+                attributes: ["id_mascota (PK)", "nombre"],
+                description: "Pacientes atendidos en la veterinaria.",
+                rule: "Participación TOTAL con Propietario (es obligatorio conocer su dueño). Participación PARCIAL con Cita (puede registrarse sin haber asistido a ninguna cita todavía)."
+            },
+            veterinario: {
+                type: "Entidad",
+                name: "VETERINARIO",
+                participation: "Parcial (en la relación Atiende)",
+                cardinalidad: "1 (hacia Cita)",
+                attributes: ["id_veterinario (PK)", "especialidad"],
+                description: "Profesionales médicos del centro.",
+                rule: "Los veterinarios pueden incorporarse a la clínica sin tener citas asignadas inicialmente (participación parcial: 0 o más citas)."
+            },
+            cita: {
+                type: "Entidad",
+                name: "CITA",
+                participation: "Total (hacia Mascota y Veterinario) / Parcial (hacia Tratamiento)",
+                cardinalidad: "N (con Mascota/Veterinario) | M (con Tratamiento)",
+                attributes: ["id_cita (PK)", "fecha_hora"],
+                description: "Consultas programadas o realizadas.",
+                rule: "Toda cita corresponde obligatoriamente a una sola mascota y tiene exactamente un veterinario responsable (Participación Total en ambos extremos)."
+            },
+            tratamiento: {
+                type: "Entidad",
+                name: "TRATAMIENTO",
+                participation: "Parcial (en la relación Incluye)",
+                cardinalidad: "M (con Cita)",
+                attributes: ["id_tratamiento (PK)", "nombre", "costo"],
+                description: "Procedimientos médicos o medicamentos del catálogo.",
+                rule: "Se mantienen en catálogo y pueden registrarse antes de utilizarse (participación parcial: pueden existir tratamientos sin aplicar aún)."
+            },
+            posee: {
+                type: "Relación (1:N)",
+                name: "POSEE",
+                participation: "Propietario (Parcial) - Mascota (Total)",
+                cardinalidad: "1 a N",
+                attributes: ["Ninguno directo"],
+                description: "Vínculo de propiedad entre cliente y animal.",
+                rule: "Un propietario posee de 0 a N mascotas. Cada mascota pertenece exactamente a 1 propietario."
+            },
+            asiste: {
+                type: "Relación (1:N)",
+                name: "ASISTE",
+                participation: "Mascota (Parcial) - Cita (Total)",
+                cardinalidad: "1 a N",
+                attributes: ["Ninguno directo"],
+                description: "Historial de consultas de la mascota.",
+                rule: "Una mascota puede tener de 0 a N citas. Cada cita pertenece exactamente a 1 mascota."
+            },
+            atiende: {
+                type: "Relación (1:N)",
+                name: "ATIENDE",
+                participation: "Veterinario (Parcial) - Cita (Total)",
+                cardinalidad: "1 a N",
+                attributes: ["Ninguno directo"],
+                description: "Asignación del profesional responsable de la consulta.",
+                rule: "Un veterinario atiende de 0 a N citas. Toda cita es atendida obligatoriamente por 1 veterinario."
+            },
+            incluye: {
+                type: "Relación (N:M)",
+                name: "INCLUYE",
+                participation: "Cita (Parcial) - Tratamiento (Parcial)",
+                cardinalidad: "N a M",
+                attributes: ["Ninguno directo"],
+                description: "Prescripción de tratamientos durante la consulta.",
+                rule: "Una cita puede incluir de 0 a N tratamientos (es posible finalizarla sin prescribir ninguno). Un tratamiento puede indicarse en 0 o varias citas."
+            }
+        };
+
+        function selectElement(key) {
+            const data = modelData[key];
+            if (!data) return;
+
+            const container = document.getElementById('inspector-content');
+            container.innerHTML = `
+                <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 flex flex-col gap-3 animate-fade-in">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">${data.type}</span>
+                        <h3 class="text-base font-bold text-white tracking-wider">${data.name}</h3>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">${data.description}</p>
+                    
+                    <div class="border-t border-slate-800 pt-2 flex flex-col gap-1.5 text-xs">
+                        <div class="flex justify-between"><span class="text-slate-400">Participación:</span> <span class="font-semibold text-sky-300 text-right">${data.participation}</span></div>
+                        <div class="flex justify-between"><span class="text-slate-400">Cardinalidad:</span> <span class="font-semibold text-emerald-300">${data.cardinalidad}</span></div>
+                    </div>
+
+                    <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 text-xs flex flex-col gap-1 mt-1">
+                        <span class="font-bold text-slate-400 uppercase text-[10px]">Condición del Enunciado:</span>
+                        <p class="text-slate-300 italic">"${data.rule}"</p>
+                    </div>
+
+                    <div class="mt-1">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Atributos asociados:</span>
+                        <div class="flex flex-wrap gap-1.5 mt-1.5">
+                            ${data.attributes.map(attr => `<span class="bg-slate-800 border border-slate-700 text-purple-300 text-[11px] px-2 py-0.5 rounded-md font-mono">${attr}</span>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function selectAttribute(attrKey) {
+            const attrMap = {
+                'id_prop': { name: 'id_propietario', entity: 'PROPIETARIO', type: 'Atributo Clave (PK)', desc: 'Identificador único del propietario.' },
+                'nombre_prop': { name: 'nombre', entity: 'PROPIETARIO', type: 'Atributo Simple', desc: 'Nombre completo del cliente.' },
+                'tel_prop': { name: 'teléfono', entity: 'PROPIETARIO', type: 'Atributo Simple', desc: 'Número de contacto telefónico.' },
+                'id_masc': { name: 'id_mascota', entity: 'MASCOTA', type: 'Atributo Clave (PK)', desc: 'Identificador único del paciente animal.' },
+                'nombre_masc': { name: 'nombre', entity: 'MASCOTA', type: 'Atributo Simple', desc: 'Nombre de la mascota.' },
+                'id_vet': { name: 'id_veterinario', entity: 'VETERINARIO', type: 'Atributo Clave (PK)', desc: 'Identificador único del médico veterinario.' },
+                'esp_vet': { name: 'especialidad', entity: 'VETERINARIO', type: 'Atributo Simple', desc: 'Área médica o especialización.' },
+                'id_cita': { name: 'id_cita', entity: 'CITA', type: 'Atributo Clave (PK)', desc: 'Identificador único de la consulta.' },
+                'fecha_cita': { name: 'fecha_hora', entity: 'CITA', type: 'Atributo Simple', desc: 'Momento programado o realizado de la cita.' },
+                'id_trat': { name: 'id_tratamiento', entity: 'TRATAMIENTO', type: 'Atributo Clave (PK)', desc: 'Identificador único del tratamiento en catálogo.' },
+                'nombre_trat': { name: 'nombre', entity: 'TRATAMIENTO', type: 'Atributo Simple', desc: 'Nombre descriptivo del tratamiento.' },
+                'costo_trat': { name: 'costo', entity: 'TRATAMIENTO', type: 'Atributo Simple', desc: 'Valor monetario del tratamiento.' }
+            };
+
+            const attr = attrMap[attrKey];
+            if (!attr) return;
+
+            const container = document.getElementById('inspector-content');
+            container.innerHTML = `
+                <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 flex flex-col gap-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">Atributo</span>
+                        <h3 class="text-base font-bold text-white font-mono">${attr.name}</h3>
+                    </div>
+                    <p class="text-xs text-slate-300">${attr.desc}</p>
+                    <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 text-xs flex flex-col gap-1">
+                        <div class="flex justify-between"><span class="text-slate-400">Entidad Propietaria:</span> <span class="font-semibold text-sky-300">${attr.entity}</span></div>
+                        <div class="flex justify-between"><span class="text-slate-400">Tipo:</span> <span class="font-semibold text-purple-300">${attr.type}</span></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Modal Controls
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function copyCode(btn) {
+            const pre = btn.previousElementSibling;
+            const text = pre.innerText;
+            const exec = document.execCommand ? () => {
+                const el = document.createElement('textarea');
+                el.value = text;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+            } : () => navigator.clipboard.writeText(text);
+            
+            exec();
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i> ¡Copiado!`;
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+            }, 2000);
+        }
+
+        function resetPositions() {
+            // Reset view / selection
+            document.getElementById('inspector-content').innerHTML = `
+                <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700/60 text-slate-400 text-center py-10">
+                    <i class="fa-regular fa-hand-pointer text-3xl mb-2 text-slate-500"></i>
+                    <p>Selecciona una entidad, relación o atributo en el diagrama o en la lista rápida para consultar su justificación y reglas de negocio.</p>
+                </div>
+            `;
+        }
+
+        // Make nodes draggable via mouse drag inside SVG
+        let selectedNode = null;
+        let offset = { x: 0, y: 0 };
+
+        const svg = document.getElementById('erd-svg');
+        
+        svg.querySelectorAll('.draggable').forEach(node => {
+            node.addEventListener('mousedown', (e) => {
+                selectedNode = node;
+                // Parse transform matrix or translate
+                const transform = node.getAttribute('transform');
+                const translateMatch = /translate\(([^,]+),\s*([^\)]+)\)/.exec(transform);
+                if (translateMatch) {
+                    offset.x = parseFloat(translateMatch[1]) - (e.clientX * (1200 / svg.clientWidth));
+                    offset.y = parseFloat(translateMatch[2]) - (e.clientY * (800 / svg.clientHeight));
+                }
+                e.stopPropagation();
+            });
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (selectedNode) {
+                const ptX = (e.clientX * (1200 / svg.clientWidth)) + offset.x;
+                const ptY = (e.clientY * (800 / svg.clientHeight)) + offset.y;
+                selectedNode.setAttribute('transform', `translate(${ptX}, ${ptY})`);
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            selectedNode = null;
+        });
+    </script>
+</body>
+</html>
